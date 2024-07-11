@@ -2,31 +2,30 @@ package com.example.demo.student;
 
 import java.time.LocalDate;
 import java.time.Period;
-
-import org.springframework.format.annotation.DateTimeFormat;
-
+import jakarta.validation.constraints.*;
 import jakarta.persistence.*;
 
 @Entity
 @Table
 public class Student {
     @Id
-    @SequenceGenerator(
-        name = "student_sequence",
-        sequenceName="student_sequence",
-        allocationSize = 1
-    )
-    @GeneratedValue(
-        strategy = GenerationType.SEQUENCE,
-        generator = "student_sequence"
-    )
+    @SequenceGenerator(name = "student_sequence", sequenceName = "student_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "student_sequence")
     private Long id;
+
+    @NotBlank(message = "Name is mandatory")
     private String name;
+
+    @Email(message = "Email should be valid")
+    @NotBlank(message = "Email is mandatory")
     private String email;
-    @Transient
-    private int age;
+
+    @NotNull(message = "Date of birth is mandatory")
+    @Past(message = "Date of birth must be in the past")
     private LocalDate dateOfBirth;
 
+    @Transient
+    private int age;
     public Student (){}
 
     public Student (Long id, String name, String email, LocalDate dateOfBirth) {
