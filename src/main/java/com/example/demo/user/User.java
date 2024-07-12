@@ -2,10 +2,18 @@ package com.example.demo.user;
 
 import jakarta.persistence.*;
 import java.util.Collection;
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+import com.example.demo.enums.UserRole;
 
 @Entity
 @Table(name = "app_user")
-public class User {
+public class User implements UserDetails{
     @Id
     @SequenceGenerator(name = "user_sequence", sequenceName = "user_sequence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "studeuser_sequencent_sequence")
@@ -14,22 +22,22 @@ public class User {
     private String password;
     private String email;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    private Collection<String> roles;
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
 
-    public User(Long id, String username, String password, String email, Collection<String> roles) {
+    public User(Long id, String username, String password, String email, UserRole role) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
-        this.roles = roles;
+        this.role = role;
     }
 
-    public User(String username, String password, String email, Collection<String> roles) {
+    public User(String username, String password, String email, UserRole role) {
         this.username = username;
         this.password = password;
         this.email = email;
-        this.roles = roles;
+        this.role = role;
     }
 
     public User() {
@@ -39,9 +47,6 @@ public class User {
         return id;
     }
 
-    public String getUsername() {
-        return username;
-    }
 
     public String getPassword() {
         return password;
@@ -51,8 +56,8 @@ public class User {
         return email;
     }
 
-    public Collection<String> getRoles() {
-        return roles;
+    public String getRole() {
+        return role.toString();
     }
 
     public void setId(Long id) {
@@ -71,8 +76,41 @@ public class User {
         this.email = email;
     }
 
-    public void setRoles(Collection<String> roles) {
-        this.roles = roles;
+    public void setRoles(UserRole role) {
+        this.role = role;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (this.role == UserRole.ADMIN) {
+        return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
+        }
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     

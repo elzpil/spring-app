@@ -45,3 +45,5 @@ src/main/resources/application.properties
 
 # Spring Boot generated files
 spring-boot-starter.log
+
+.env
