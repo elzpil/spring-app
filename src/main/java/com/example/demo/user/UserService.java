@@ -24,6 +24,18 @@ public class UserService implements UserDetailsService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        System.out.println("loadUserByUsername() in UserService " );
+        var optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get(); 
+            return user;
+        } else {
+            throw new RuntimeException("User not found loadUserByUsername()");
+        }
+    }
+
     public User registerUser(User user) {  
         user.setPassword(passwordEncoder.encode(user.getPassword()));    
         return userRepository.save(user);
@@ -57,16 +69,5 @@ public class UserService implements UserDetailsService {
         return userRepository.findByUsername(username).orElse(null);
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        System.out.println("loadUserByUsername() in UserService " );
-        var optionalUser = userRepository.findByUsername(username);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get(); 
-            return user;
-        } else {
-            throw new RuntimeException("User not found loadUserByUsername()");
-        }
-        
-    }
+
 }

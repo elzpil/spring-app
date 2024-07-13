@@ -1,11 +1,16 @@
 package com.example.demo.config;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,6 +23,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.example.demo.config.auth.SecurityFilter;
+import com.example.demo.user.UserService;
 
 @Configuration
 @EnableWebSecurity
@@ -27,6 +33,12 @@ public class SecurityConfig {
 
     @Autowired
     SecurityFilter securityFilter;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -38,8 +50,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
             .requestMatchers(HttpMethod.POST, "/api/v1/auth/*").permitAll()
             //.requestMatchers(HttpMethod.POST, "/api/v1/student/*").hasRole("ADMIN")
-            .anyRequest().permitAll())
-            .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
+            .anyRequest().permitAll());
+            //.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
             
             if(!csrfEnabled)
             {
@@ -49,16 +61,11 @@ public class SecurityConfig {
 		return http.build();
 	}
 
-    @Bean
+    /* @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-    @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
-        throws Exception {
-            System.out.println("authenticationManager==========================");
-        return authenticationConfiguration.getAuthenticationManager();
-    }
+    } */
+
     // ?
     @Bean
     public UserDetailsService userDetailsService() {
@@ -66,4 +73,25 @@ public class SecurityConfig {
             throw new IllegalStateException("User not found userDetailsService()");
         };
     }
+
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(passwordEncoder);
+        provider.setUserDetailsService(userService);  
+        return provider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(List<AuthenticationProvider> myAuthenticationProviders) {
+        return new ProviderManager(myAuthenticationProviders);
+    }
+    /* @Bean
+    AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+        throws Exception {
+        
+        return authenticationConfiguration.getAuthenticationManager();
+    } */
 }
+
+
