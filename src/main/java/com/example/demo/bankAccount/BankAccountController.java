@@ -15,11 +15,9 @@ public class BankAccountController {
         this.bankAccountService = bankAccountService;
     }
 
-
-
     @PostMapping("/create")
     public ResponseEntity<BankAccount> createAccount(@RequestBody BankAccount bankAccount) {
-        System.out.println("==================id " + bankAccount.getId() +" ==================== " + bankAccount.getBalance());
+
         BankAccount createdAccount = bankAccountService.createAccount(bankAccount.getId(), bankAccount.getBalance());
         return ResponseEntity.ok(createdAccount);
     }
@@ -32,25 +30,37 @@ public class BankAccountController {
 
     @PostMapping("/deposit")
     public ResponseEntity<String> deposit(@RequestBody DepositRequest depositRequest) {
-        bankAccountService.deposit(depositRequest.getId(), depositRequest.getAmount());
-        return ResponseEntity.ok("Deposit successful");
-    }
+        boolean success = bankAccountService.deposit(depositRequest.getId(), depositRequest.getAmount());
 
+        if (success) {
+            return ResponseEntity.ok("Deposit successful");
+        } else {
+            return ResponseEntity.badRequest().body("Deposit unsuccessful: Amount must be more than zero");
+        }
+    }
 
     @PostMapping("/withdraw")
     public ResponseEntity<String> withdraw(@RequestBody DepositRequest depositRequest) {
-        bankAccountService.withdraw(depositRequest.getId(), depositRequest.getAmount());
-        return ResponseEntity.ok("Withdrawal successful");
+        boolean success =  bankAccountService.withdraw(depositRequest.getId(), depositRequest.getAmount());
+        if (success) {
+            return ResponseEntity.ok("Withdrawal successful");
+        } else {
+            return ResponseEntity.badRequest().body("Withdrawal unsuccessful");
+        }
     }
 
     @PostMapping("/transfer")
     public ResponseEntity<String> transfer(@RequestBody TransferRequest transferRequest) {
-        bankAccountService.transfer(
+        boolean success = bankAccountService.transfer(
                 transferRequest.getFromAccountId(),
                 transferRequest.getToAccountId(),
                 transferRequest.getAmount()
         );
-        return ResponseEntity.ok("Transfer successful");
+        if (success) {
+            return ResponseEntity.ok("Transfer successful");
+        } else {
+            return ResponseEntity.badRequest().body("Transfer unsuccessful");
+        }
     }
 
 }
