@@ -1,8 +1,6 @@
 package com.example.demo.config;
 
 import com.example.demo.enums.UserRole;
-import com.example.demo.student.Student;
-import com.example.demo.student.StudentRepository;
 import com.example.demo.user.User;
 import com.example.demo.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +22,12 @@ public class AppConfig {
     private PasswordEncoder passwordEncoder;
 
     @Bean
-    CommandLineRunner commandLineRunner(UserRepository userRepository, StudentRepository studentRepository) {
+    CommandLineRunner commandLineRunner(UserRepository userRepository) {
         return args -> {
-            User user1 = new User("user1", passwordEncoder.encode("password1"), "user1@example.com", UserRole.ADMIN);
-            userRepository.saveAll(List.of(user1));
-
-            Student name = new Student (1L, "name", "email@email.com", LocalDate.of(2000, Month.MAY, 5));
-            Student name2 = new Student ("name2", "email2@email.com", LocalDate.of(2000, Month.MAY, 6));
-            studentRepository.saveAll(List.of(name,  name2));
+            if (userRepository.count() == 0) {  // Only add users if none exist
+                User user1 = new User("user1", passwordEncoder.encode("password1"), "user1@example.com", UserRole.ADMIN);
+                userRepository.save(user1);
+            }
         };
     }
 

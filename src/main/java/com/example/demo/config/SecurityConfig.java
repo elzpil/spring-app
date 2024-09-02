@@ -55,7 +55,7 @@ public class SecurityConfig {
             
             if(!csrfEnabled)
             {
-            http.csrf(AbstractHttpConfigurer::disable);
+                http.csrf(AbstractHttpConfigurer::disable);
             } 
             
 		return http.build();

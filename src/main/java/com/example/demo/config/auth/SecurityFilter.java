@@ -26,8 +26,9 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
-            if ((request.getRequestURI().equals("/api/v1/auth/signup")|| request.getRequestURI().equals("/api/v1/auth/signin")) && !hasToken(request)) {
+            if ((request.getRequestURI().contains("/api/v1/auth/signup")|| request.getRequestURI().contains("/api/v1/auth/signin")) && !hasToken(request)) {
                 // If it's a signup request and doesn't have a token, skip authentication logic
+                System.out.println("==============filterChain.doFilter(request, response);=================");
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -36,7 +37,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             var login = tokenService.validateToken(token);
             var optionalUser = userRepository.findByUsername(login);
             if (optionalUser.isPresent()) {
-                User user = optionalUser.get(); 
+                User user = optionalUser.get();
                 var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
