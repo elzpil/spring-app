@@ -47,3 +47,5 @@ src/main/resources/application.properties
 spring-boot-starter.log
 
 .env
+
+.idea/
