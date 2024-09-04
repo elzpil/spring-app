@@ -33,6 +33,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                 return;
             }
         var token = this.recoverToken(request);
+        System.out.println(token + " ttokęn  in dofilter internal");
         if (token != null) {
             var login = tokenService.validateToken(token);
             var optionalUser = userRepository.findByUsername(login);

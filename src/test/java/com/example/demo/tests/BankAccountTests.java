@@ -14,7 +14,7 @@ public class BankAccountTests {
 
     @BeforeEach
     void setUp() {
-        bankAccount = new BankAccount("id1", 100.0);
+        bankAccount = new BankAccount(1L, 100.0);
     }
 
     @Test

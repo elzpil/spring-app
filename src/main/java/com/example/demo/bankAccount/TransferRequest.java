@@ -1,24 +1,24 @@
 package com.example.demo.bankAccount;
 
 public class TransferRequest {
-    private String fromAccountId;
-    private String toAccountId;
+    private Long fromAccountId;
+    private Long toAccountId;
     private double amount;
 
     // Getters and setters
-    public String getFromAccountId() {
+    public Long getFromAccountId() {
         return fromAccountId;
     }
 
-    public void setFromAccountId(String fromAccountId) {
+    public void setFromAccountId(Long fromAccountId) {
         this.fromAccountId = fromAccountId;
     }
 
-    public String getToAccountId() {
+    public Long getToAccountId() {
         return toAccountId;
     }
 
-    public void setToAccountId(String toAccountId) {
+    public void setToAccountId(Long toAccountId) {
         this.toAccountId = toAccountId;
     }
 
