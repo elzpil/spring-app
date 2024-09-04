@@ -30,39 +30,42 @@ public class BankAccount {
         this.balance = balance;
     }
 
-    public void deposit(double amount) {
+    public boolean deposit(double amount) {
         if (amount <= 0) {
             System.out.println("Amount must be more than zero");
-            return;
+            return false;
         }
         balance += amount;
         System.out.println("Deposit complete: " + amount);
+        return true;
     }
 
-    public void withdraw(double amount) {
+    public boolean withdraw(double amount) {
         if (amount <= 0) {
             System.out.println("Withdrawal amount must be positive");
-            return;
+            return false;
         }
         if (amount > balance) {
             System.out.println("Insufficient funds");
-            return;
+            return false;
         }
         balance -= amount;
         System.out.println("Withdrawal complete: " + amount);
+        return true;
     }
 
-    public void transfer(double amount, BankAccount targetAccount) {
+    public boolean transfer(double amount, BankAccount targetAccount) {
         if (amount <= 0) {
             System.out.println("Amount must be more than zero");
-            return;
+            return false;
         }
         if (amount > balance) {
             System.out.println("Insufficient funds");
-            return;
+            return false;
         }
         this.withdraw(amount);
         targetAccount.deposit(amount);
         System.out.println("Transfer completed: " + amount);
+        return true;
     }
 }
