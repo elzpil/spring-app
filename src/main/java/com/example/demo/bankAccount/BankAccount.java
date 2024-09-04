@@ -1,24 +1,29 @@
 package com.example.demo.bankAccount;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.example.demo.user.User;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "bank_account")
 public class BankAccount {
+
     @Id
-    private String id;
+    @SequenceGenerator(name = "account_sequence", sequenceName = "account_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_sequence")
+    private Long id;
+    private Long userId;
     private double balance;
+
     public BankAccount() {
     }
 
-    public BankAccount(String id, double balance) {
-        this.id = id;
+
+    public BankAccount(Long userId, double balance) {
+        this.userId = userId;
         this.balance = balance;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
@@ -26,9 +31,19 @@ public class BankAccount {
         return balance;
     }
 
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
     public void setBalance(double balance) {
         this.balance = balance;
     }
+
+
 
     public boolean deposit(double amount) {
         if (amount <= 0) {

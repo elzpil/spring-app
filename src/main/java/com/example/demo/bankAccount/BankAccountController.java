@@ -1,37 +1,67 @@
 package com.example.demo.bankAccount;
 
+import com.example.demo.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/v1/bankAccount")
 public class BankAccountController {
 
     private final BankAccountService bankAccountService;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public BankAccountController(BankAccountService bankAccountService) {
+    public BankAccountController(BankAccountService bankAccountService, JwtUtil jwtUtil) {
         this.bankAccountService = bankAccountService;
+        this.jwtUtil = jwtUtil;
+    }
+
+    private Long getUserIdFromToken(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return null;  // Authorization header is missing or invalid
+        }
+
+        String token = authorizationHeader.substring(7);
+        return jwtUtil.extractUserId(token);
     }
 
     @PostMapping("/create")
-    public ResponseEntity<BankAccount> createAccount(@RequestBody BankAccount bankAccount) {
-
-        BankAccount createdAccount = bankAccountService.createAccount(bankAccount.getId(), bankAccount.getBalance());
+    public ResponseEntity<?> createAccount(HttpServletRequest request, @RequestBody BankAccount bankAccount) {
+        Long userId = getUserIdFromToken(request);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorization header is missing or invalid.");
+        }
+        BankAccount createdAccount = bankAccountService.createAccount(userId, bankAccount.getBalance());
         return ResponseEntity.ok(createdAccount);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BankAccount> getAccount(@PathVariable String id) {
-        BankAccount account = bankAccountService.getAccount(id);
-        return ResponseEntity.ok(account);
+    public ResponseEntity<?> getAccount(@PathVariable Long id, HttpServletRequest request) {
+        Long userId = getUserIdFromToken(request);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorization header is missing or invalid.");
+        }
+        try {
+            BankAccount account = bankAccountService.getAccount(id, userId);
+            return ResponseEntity.ok(account);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied: The account does not belong to the user.");
+        }
     }
 
     @PostMapping("/deposit")
-    public ResponseEntity<String> deposit(@RequestBody DepositRequest depositRequest) {
-        boolean success = bankAccountService.deposit(depositRequest.getId(), depositRequest.getAmount());
-
+    public ResponseEntity<?> deposit(@RequestBody DepositRequest depositRequest, HttpServletRequest request) {
+        Long userId = getUserIdFromToken(request);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorization header is missing or invalid.");
+        }
+        boolean success = bankAccountService.deposit(depositRequest.getId(), depositRequest.getAmount(), userId);
         if (success) {
             return ResponseEntity.ok("Deposit successful");
         } else {
@@ -40,8 +70,12 @@ public class BankAccountController {
     }
 
     @PostMapping("/withdraw")
-    public ResponseEntity<String> withdraw(@RequestBody DepositRequest depositRequest) {
-        boolean success =  bankAccountService.withdraw(depositRequest.getId(), depositRequest.getAmount());
+    public ResponseEntity<?> withdraw(@RequestBody DepositRequest depositRequest, HttpServletRequest request) {
+        Long userId = getUserIdFromToken(request);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorization header is missing or invalid.");
+        }
+        boolean success = bankAccountService.withdraw(depositRequest.getId(), depositRequest.getAmount(), userId);
         if (success) {
             return ResponseEntity.ok("Withdrawal successful");
         } else {
@@ -50,11 +84,16 @@ public class BankAccountController {
     }
 
     @PostMapping("/transfer")
-    public ResponseEntity<String> transfer(@RequestBody TransferRequest transferRequest) {
+    public ResponseEntity<?> transfer(@RequestBody TransferRequest transferRequest, HttpServletRequest request) {
+        Long userId = getUserIdFromToken(request);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorization header is missing or invalid.");
+        }
         boolean success = bankAccountService.transfer(
                 transferRequest.getFromAccountId(),
                 transferRequest.getToAccountId(),
-                transferRequest.getAmount()
+                transferRequest.getAmount(),
+                userId
         );
         if (success) {
             return ResponseEntity.ok("Transfer successful");
@@ -62,5 +101,4 @@ public class BankAccountController {
             return ResponseEntity.badRequest().body("Transfer unsuccessful");
         }
     }
-
 }

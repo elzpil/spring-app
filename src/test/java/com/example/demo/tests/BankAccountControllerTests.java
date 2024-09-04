@@ -2,7 +2,6 @@ package com.example.demo.tests;
 
 import com.example.demo.bankAccount.*;
 import com.example.demo.config.SecurityConfig;
-import com.example.demo.config.auth.SecurityFilter;
 import com.example.demo.config.auth.TokenProvider;
 import com.example.demo.user.UserRepository;
 import com.example.demo.user.UserService;
@@ -21,7 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import({SecurityConfig.class, TokenProvider.class, SecurityFilter.class})
+@Import({SecurityConfig.class, TokenProvider.class})
 @WebMvcTest(BankAccountController.class)
 public class BankAccountControllerTests {
 
@@ -33,37 +32,45 @@ public class BankAccountControllerTests {
 
     @Autowired
     private ObjectMapper objectMapper;
+
     @MockBean
     private UserRepository userRepository;
+
     @MockBean
     private UserService userService;
+
+    private String generateToken() {
+        // You should implement token generation with valid credentials
+        // This is a placeholder example
+        return "Bearer your_valid_token_here";
+    }
 
     @Test
     void createAccount_ShouldReturnCreatedAccount() throws Exception {
         // Arrange
-        BankAccount account = new BankAccount("id1", 100.0);
-        when(bankAccountService.createAccount(any(String.class), any(Double.class)))
+        BankAccount account = new BankAccount(1L, 100.0);
+        when(bankAccountService.createAccount(any(Long.class), any(Double.class)))
                 .thenReturn(account);
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/bankAccount/create")
+                        .header("Authorization", generateToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(account)))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(account)));
     }
 
-
-
     @Test
     void deposit_ShouldReturnSuccessMessage() throws Exception {
         // Arrange
         DepositRequest depositRequest = new DepositRequest();
-        depositRequest.setId("id1");
+        depositRequest.setId(1L);
         depositRequest.setAmount(50.0);
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/bankAccount/deposit")
+                        .header("Authorization", generateToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(depositRequest)))
                 .andExpect(status().isOk())
@@ -74,12 +81,13 @@ public class BankAccountControllerTests {
     void transfer_ShouldReturnSuccessMessage() throws Exception {
         // Arrange
         TransferRequest transferRequest = new TransferRequest();
-        transferRequest.setFromAccountId("id1");
-        transferRequest.setToAccountId("id2");
+        transferRequest.setFromAccountId(1L);
+        transferRequest.setToAccountId(2L);
         transferRequest.setAmount(50.0);
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/bankAccount/transfer")
+                        .header("Authorization", generateToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(transferRequest)))
                 .andExpect(status().isOk())

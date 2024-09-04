@@ -29,7 +29,7 @@ public class BankAccountServiceTests {
     @Test
     void createAccount_ShouldReturnCreatedAccount() {
         // Arrange
-        String id = "id1";
+        Long id = 1L;
         double initialBalance = 100.0;
         BankAccount account = new BankAccount(id, initialBalance);
 
@@ -47,7 +47,7 @@ public class BankAccountServiceTests {
     @Test
     void deposit_ShouldIncreaseBalance() {
         // Arrange
-        String id = "id1";
+        Long id = 1L;
         double initialBalance = 100.0;
         double depositAmount = 50.0;
         BankAccount account = new BankAccount(id, initialBalance);
@@ -55,7 +55,7 @@ public class BankAccountServiceTests {
         when(bankAccountRepository.findById(id)).thenReturn(java.util.Optional.of(account));
 
         // Act
-        bankAccountService.deposit(id, depositAmount);
+        bankAccountService.deposit(id, depositAmount, id);
 
         // Assert
         assertEquals(150.0, account.getBalance());
@@ -64,7 +64,7 @@ public class BankAccountServiceTests {
     @Test
     void withdraw_ShouldDecreaseBalance() {
         // Arrange
-        String id = "id1";
+        Long id = 1L;
         double initialBalance = 100.0;
         double withdrawAmount = 50.0;
         BankAccount account = new BankAccount(id, initialBalance);
@@ -72,7 +72,7 @@ public class BankAccountServiceTests {
         when(bankAccountRepository.findById(id)).thenReturn(java.util.Optional.of(account));
 
         // Act
-        bankAccountService.withdraw(id, withdrawAmount);
+        bankAccountService.withdraw(id, withdrawAmount, id);
 
         // Assert
         assertEquals(50.0, account.getBalance());
@@ -81,8 +81,8 @@ public class BankAccountServiceTests {
     @Test
     void transfer_ShouldTransferFundsBetweenAccounts() {
         // Arrange
-        String fromAccountId = "id1";
-        String toAccountId = "id2";
+        Long fromAccountId = 1L;
+        Long toAccountId = 2L;
         double transferAmount = 50.0;
 
         BankAccount fromAccount = new BankAccount(fromAccountId, 100.0);
@@ -92,7 +92,7 @@ public class BankAccountServiceTests {
         when(bankAccountRepository.findById(toAccountId)).thenReturn(java.util.Optional.of(toAccount));
 
         // Act
-        bankAccountService.transfer(fromAccountId, toAccountId, transferAmount);
+        bankAccountService.transfer(fromAccountId, toAccountId, transferAmount, fromAccountId);
 
         // Assert
         assertEquals(50.0, fromAccount.getBalance());
