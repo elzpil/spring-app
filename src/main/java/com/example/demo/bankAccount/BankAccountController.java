@@ -101,4 +101,37 @@ public class BankAccountController {
             return ResponseEntity.badRequest().body("Transfer unsuccessful");
         }
     }
+    @PutMapping("/edit")
+    public ResponseEntity<?> editAccount(@RequestBody BankAccount bankAccount, HttpServletRequest request) {
+        Long userId = getUserIdFromToken(request);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorization header is missing or invalid.");
+        }
+
+        try {
+            BankAccount updatedAccount = bankAccountService.editAccount(bankAccount.getId(), userId, bankAccount);
+            return ResponseEntity.ok(updatedAccount);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied: The account does not belong to the user.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteAccount(@PathVariable Long id, HttpServletRequest request) {
+        Long userId = getUserIdFromToken(request);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorization header is missing or invalid.");
+        }
+
+        try {
+            bankAccountService.deleteAccount(id, userId);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();  // Return no content on successful deletion
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied: The account does not belong to the user.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
 }

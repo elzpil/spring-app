@@ -67,7 +67,7 @@ public class BankAccountTests {
     @Test
     void transfer_ShouldDecreaseBalanceOfSourceAccountAndIncreaseBalanceOfTargetAccount_WhenAmountIsValid() {
         // Arrange
-        BankAccount targetAccount = new BankAccount("id2", 50.0);
+        BankAccount targetAccount = new BankAccount(3L, 50.0);
 
         // Act
         bankAccount.transfer(50.0, targetAccount);
@@ -80,7 +80,7 @@ public class BankAccountTests {
     @Test
     void transfer_ShouldNotChangeBalances_WhenAmountIsZeroOrNegative() {
         // Arrange
-        BankAccount targetAccount = new BankAccount("id2", 50.0);
+        BankAccount targetAccount = new BankAccount(3L, 50.0);
 
         // Act
         bankAccount.transfer(0.0, targetAccount);
@@ -94,7 +94,7 @@ public class BankAccountTests {
     @Test
     void transfer_ShouldNotChangeBalances_WhenAmountExceedsSourceAccountBalance() {
         // Arrange
-        BankAccount targetAccount = new BankAccount("id2", 50.0);
+        BankAccount targetAccount = new BankAccount(3L, 50.0);
 
         // Act
         bankAccount.transfer(150.0, targetAccount);
