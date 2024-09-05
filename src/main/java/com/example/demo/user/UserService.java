@@ -2,6 +2,7 @@ package com.example.demo.user;
 
 import java.util.Optional;
 
+import com.example.demo.enums.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -64,7 +65,25 @@ public class UserService implements UserDetailsService {
         User savedUser = userRepository.save(newUser);
     
     return savedUser; 
-}
+    }
+    public User editUser(Long id, User userDetails) {
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        existingUser.setEmail(userDetails.getEmail());
+        existingUser.setPassword(passwordEncoder.encode(userDetails.getPassword()));
+        UserRole role = UserRole.valueOf(userDetails.getRole().toUpperCase());
+        existingUser.setRoles(role);
+
+        return userRepository.save(existingUser);
+    }
+
+    public void deleteUser(Long id) {
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        userRepository.delete(existingUser);
+    }
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username).orElse(null);

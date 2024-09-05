@@ -111,4 +111,17 @@ public class BankAccountService {
             throw new RuntimeException("Unable to transfer funds at this time. Please try again later.");
         }
     }
+    public BankAccount editAccount(Long accountId, Long userId, BankAccount updatedAccountDetails) {
+        BankAccount existingAccount = getAccount(accountId, userId);
+        existingAccount.setBalance(updatedAccountDetails.getBalance());
+        existingAccount.setUserId(updatedAccountDetails.getUserId());
+        return bankAccountRepository.save(existingAccount);
+    }
+
+    // Delete Bank Account
+    public void deleteAccount(Long accountId, Long userId) {
+        BankAccount existingAccount = getAccount(accountId, userId);
+        bankAccountRepository.delete(existingAccount);
+    }
+
 }
